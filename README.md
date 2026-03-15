@@ -25,7 +25,7 @@
 - [ ] Email alerts on budget exceeded
 - [ ] CSV export + mobile responsive
 
-## Performance Optimization
+## Test Performance Optimization
 
 Added composite indexes on `(user_id, expense_date)` and `(user_id, category)`
 on the expenses table to speed up the two most common queries — the dashboard
@@ -34,8 +34,8 @@ monthly chart and the category pie chart.
 |              | Before Index          | After Index        |
 | ------------ | --------------------- | ------------------ |
 | Scan type    | ALL (full table scan) | range (index used) |
-| Rows scanned | ~10,000+              | ~20                |
-| Query speed  | baseline              | ~60% faster        |
+| Rows scanned | ~1920                 | ~305               |
+| Query speed  | baseline              | ~84% faster        |
 
 ![EXPLAIN before index](docs/explain-before-index.jpeg)
 ![EXPLAIN after index](docs/explain-after-index.jpeg)
