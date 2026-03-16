@@ -10,20 +10,41 @@
 
 ## Tech Stack
 
-- **Frontend:** React.js + Tailwind CSS + Recharts
-- **Backend:** Node.js + Express.js
-- **Database:** MySQL with composite indexing
-- **Auth:** JWT + bcrypt
-- **Testing:** Jest (85% coverage)
-- **DevOps:** Docker Compose
+| Layer      | Technology                                      |
+| ---------- | ----------------------------------------------- |
+| Frontend   | React.js + Tailwind CSS + Recharts              |
+| Backend    | Node.js + Express.js                            |
+| Database   | MySQL 8 with composite indexing                 |
+| Auth       | JWT + bcrypt (saltRounds: 10)                   |
+| Validation | Joi schema validation                           |
+| Security   | express-rate-limit, CORS, parameterized queries |
+| Testing    | Jest + Supertest (Week 3)                       |
+| DevOps     | Docker Compose                                  |
+| Deployment | Railway (API) + Vercel (Frontend)               |
 
-## Key Features
+## Features
 
-- [ ] JWT authentication (register/login)
-- [ ] Anomaly detection (Z-score algorithm)
-- [ ] Multi-user shared expense groups
-- [ ] Email alerts on budget exceeded
-- [ ] CSV export + mobile responsive
+### Completed
+
+- [x] MySQL schema — 5 tables with foreign keys and composite indexes
+- [x] Express server with middleware stack (CORS, Morgan, rate limiting)
+- [x] JWT authentication — register and login
+- [x] Password hashing with bcrypt (saltRounds: 10)
+- [x] Joi request validation with descriptive error messages
+- [x] Protected routes via JWT middleware
+- [x] Login rate limiting (5 attempts per 15 minutes)
+- [x] Global error handler with proper HTTP status codes
+
+### In Progress
+
+- [ ] Expense CRUD REST API (Day 4)
+- [ ] Z-score anomaly detection algorithm (Day 5)
+- [ ] Multi-user shared expense groups (Day 6–7)
+- [ ] React frontend with Tailwind (Week 2)
+- [ ] Analytics dashboard with Recharts (Week 2)
+- [ ] Jest test suite — 85% coverage target (Week 3)
+- [ ] Docker Compose containerization (Week 3)
+- [ ] Email alerts on budget exceeded (Week 3)
 
 ## Test Performance Optimization
 
@@ -40,6 +61,55 @@ monthly chart and the category pie chart.
 ![EXPLAIN before index](docs/explain-before-index.jpeg)
 ![EXPLAIN after index](docs/explain-after-index.jpeg)
 
-## Status
+## Project Structure
 
-🚧 In active development — Day 2 of 28
+```
+expense-tracker-fullstack/
+├── client/                       # React frontend (Week 2)
+├── server/
+│   ├── src/
+│   │   ├── config/
+│   │   │   ├── db.js             # MySQL connection pool
+│   │   │   └── schema.sql        # Database schema
+│   │   ├── routes/
+│   │   │   └── auth.js           # Auth route definitions
+│   │   ├── controllers/
+│   │   │   └── authController.js # Register, login, getMe logic
+│   │   ├── models/
+│   │   │   └── userModel.js      # User DB queries
+│   │   ├── middleware/
+│   │   │   └── authMiddleware.js # JWT verification
+│   │   ├── utils/
+│   │   │   ├── AppError.js       # Custom error class
+│   │   │   └── validators.js     # Joi validation schemas
+│   │   └── index.js              # Express server entry point
+│   └── tests/                    # Jest tests (Week 3)
+├── docker-compose.yml
+└── README.md
+
+## Security Implementation
+
+- **Passwords** — hashed with bcrypt, saltRounds: 10. Plain passwords never stored or logged.
+- **JWT** — signed with secret from environment variable, expires in 7 days.
+- **Rate limiting** — login endpoint: 5 requests per 15 minutes per IP.
+- **SQL injection** — prevented via parameterized queries (`?` placeholders) throughout.
+- **Input validation** — Joi schemas validate all request bodies before hitting the database.
+- **Error messages** — login returns "Invalid email or password" for both wrong email and wrong password (prevents user enumeration).
+
+---
+
+## Development Progress
+
+| Day | Task | Status |
+|-----|------|--------|
+| Day 1 | Environment setup, GitHub repo | ✅ Done |
+| Day 2 | Express server, MySQL schema + indexes | ✅ Done |
+| Day 3 | JWT auth, bcrypt, Joi validation, rate limiting | ✅ Done |
+| Day 4 | Expense CRUD APIs | 🔄 Next |
+| Day 5 | Z-score anomaly detection | ⏳ Pending |
+| Day 6–7 | Group expenses + analytics APIs | ⏳ Pending |
+| Week 2 | React frontend + Tailwind + charts | ⏳ Pending |
+| Week 3 | Jest tests, Docker, query optimization docs | ⏳ Pending |
+| Week 4 | Deploy + README polish + CI/CD | ⏳ Pending |
+
+```
