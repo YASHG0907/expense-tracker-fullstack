@@ -41,4 +41,71 @@ const loginSchema = Joi.object({
   password: Joi.string().required(),
 });
 
-module.exports = { registerSchema, loginSchema };
+// Add this to src/utils/validators.js
+
+const VALID_CATEGORIES = [
+  "Food",
+  "Transport",
+  "Shopping",
+  "Health",
+  "Entertainment",
+  "Housing",
+  "Utilities",
+  "Education",
+  "Travel",
+  "Other",
+];
+
+const createExpenseSchema = Joi.object({
+  title: Joi.string()
+    .min(1)
+    .max(200)
+    .required()
+    .messages({ "any.required": "Title is required" }),
+
+  amount: Joi.number()
+    .positive() // must be greater than 0
+    .precision(2) // max 2 decimal places
+    .required()
+    .messages({
+      "number.positive": "Amount must be greater than 0",
+      "any.required": "Amount is required",
+    }),
+
+  category: Joi.string()
+    .valid(...VALID_CATEGORIES) // must be one of the valid values
+    .required()
+    .messages({
+      "any.only": `Category must be one of: ${VALID_CATEGORIES.join(", ")}`,
+    }),
+
+  expense_date: Joi.date()
+    .max("now") // can't add future expenses
+    .required()
+    .messages({
+      "date.max": "Expense date cannot be in the future",
+      "any.required": "Date is required",
+    }),
+
+  note: Joi.string()
+    .max(500)
+    .allow("") // empty string is ok
+    .optional(),
+});
+
+// For update — all fields optional (only send what changed)
+const updateExpenseSchema = Joi.object({
+  title: Joi.string().min(1).max(200),
+  amount: Joi.number().positive().precision(2),
+  category: Joi.string().valid(...VALID_CATEGORIES),
+  expense_date: Joi.date().max("now"),
+  note: Joi.string().max(500).allow("").optional(),
+}).min(1); // at least one field must be provided
+
+// Replace the existing module.exports with this
+module.exports = {
+  registerSchema,
+  loginSchema,
+  createExpenseSchema,
+  updateExpenseSchema,
+};

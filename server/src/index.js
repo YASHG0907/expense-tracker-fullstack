@@ -41,8 +41,8 @@ const globalLimiter = rateLimit({
 app.use("/api", globalLimiter);
 
 // ─── ROUTES ─────────────────────────────────────────────
-// Uncomment these as you build them in coming days:
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/expenses", require("./routes/expenses"));
 // app.use('/api/expenses', require('./routes/expenses')); ← Day 4
 
 // ─── HEALTH CHECK ───────────────────────────────────────
