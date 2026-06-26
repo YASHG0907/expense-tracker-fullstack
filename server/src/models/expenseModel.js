@@ -170,6 +170,39 @@ const getMonthlyTotal = async (userId, month, year) => {
   return parseFloat(rows[0].total);
 };
 
+// ─── CATEGORY HISTORY FOR ANOMALY DETECTION ───────────────
+// Returns spending grouped by category AND by month
+// Example output:
+//   [
+//     { category: 'Food', year: 2025, month: 1, total: '1200.00' },
+//     { category: 'Food', year: 2025, month: 2, total: '1100.00' },
+//     { category: 'Food', year: 2025, month: 3, total: '3500.00' },
+//     { category: 'Transport', year: 2025, month: 1, total: '300.00' },
+//     ...
+//   ]
+
+const getCategoryHistoryForAnomaly = async (userId, monthsBack = 4) => {
+  const [rows] = await pool.query(
+    `SELECT 
+       category,
+       YEAR(expense_date)  AS year,
+       MONTH(expense_date) AS month,
+       SUM(amount)         AS total
+     FROM expenses
+     WHERE 
+       user_id = ?
+       AND expense_date >= DATE_SUB(CURDATE(), INTERVAL ? MONTH)
+     GROUP BY 
+       category, 
+       YEAR(expense_date), 
+       MONTH(expense_date)
+     ORDER BY 
+       category, year, month`,
+    [userId, monthsBack],
+  );
+  return rows;
+};
+
 module.exports = {
   getExpensesByUser,
   getExpenseById,
@@ -179,4 +212,5 @@ module.exports = {
   getMonthlySummary,
   getCategoryTotals,
   getMonthlyTotal,
+  getCategoryHistoryForAnomaly,
 };

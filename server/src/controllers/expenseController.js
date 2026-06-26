@@ -9,7 +9,13 @@ const {
   getMonthlySummary,
   getCategoryTotals,
   getMonthlyTotal,
+  getCategoryHistoryForAnomaly,
 } = require("../models/expenseModel");
+
+const {
+  detectAnomalies,
+  buildCategoryMaps,
+} = require("../utils/anomalyDetector");
 
 const { findById } = require("../models/userModel");
 const {
@@ -237,6 +243,36 @@ const getSummary = async (req, res, next) => {
   }
 };
 
+const getAnomalies = async (req, res, next) => {
+  try {
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+
+    const rows = await getCategoryHistoryForAnomaly(req.userId, 4);
+
+    const { historyByCategory, currentByCategory } = buildCategoryMaps(
+      rows,
+      currentMonth,
+      currentYear,
+    );
+
+    const anomalies = detectAnomalies(
+      historyByCategory,
+      currentByCategory,
+      2.0,
+    );
+
+    res.status(200).json({
+      success: true,
+      count: anomalies.length,
+      data: anomalies,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // ─── CSV EXPORT ───────────────────────────────────────────
 // GET /api/expenses/export
 // Downloads all user's expenses as a CSV file
@@ -274,4 +310,5 @@ module.exports = {
   removeExpense,
   getSummary,
   exportCSV,
+  getAnomalies,
 };

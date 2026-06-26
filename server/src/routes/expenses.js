@@ -12,6 +12,7 @@ const {
   removeExpense,
   getSummary,
   exportCSV,
+  getAnomalies,
 } = require("../controllers/expenseController");
 
 // Apply protect middleware to ALL routes in this file
@@ -25,6 +26,7 @@ router.use(protect);
 // /api/expenses/summary → if /:id is first, req.params.id = "summary"
 router.get("/summary", getSummary);
 router.get("/export", exportCSV);
+router.get("/anomalies", getAnomalies);
 
 // Standard CRUD routes
 router.get("/", getAllExpenses);
