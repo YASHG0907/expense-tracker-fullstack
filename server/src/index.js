@@ -43,7 +43,7 @@ app.use("/api", globalLimiter);
 // ─── ROUTES ─────────────────────────────────────────────
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/expenses", require("./routes/expenses"));
-// app.use('/api/expenses', require('./routes/expenses')); ← Day 4
+app.use("/api/groups", require("./routes/groups"));
 
 // ─── HEALTH CHECK ───────────────────────────────────────
 app.get("/health", (req, res) => {

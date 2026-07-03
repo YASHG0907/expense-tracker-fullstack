@@ -102,10 +102,40 @@ const updateExpenseSchema = Joi.object({
   note: Joi.string().max(500).allow("").optional(),
 }).min(1); // at least one field must be provided
 
+const createGroupSchema = Joi.object({
+  name: Joi.string()
+    .min(2)
+    .max(100)
+    .required()
+    .messages({ "any.required": "Group name is required" }),
+
+  monthly_limit: Joi.number().min(0).optional().allow(null),
+
+  // Array of email addresses to invite — must be valid emails
+  memberEmails: Joi.array()
+    .items(Joi.string().email())
+    .min(1)
+    .required()
+    .messages({
+      "array.min": "Invite at least 1 other member to the group",
+      "any.required": "memberEmails array is required",
+    }),
+});
+
+const addGroupExpenseSchema = Joi.object({
+  title: Joi.string().min(1).max(200).required(),
+  amount: Joi.number().positive().precision(2).required(),
+  expense_date: Joi.date().max("now").required(),
+  note: Joi.string().max(500).allow("").optional(),
+  paid_by: Joi.number().integer().optional(),
+  // optional — if not provided, defaults to the logged-in user
+});
 // Replace the existing module.exports with this
 module.exports = {
   registerSchema,
   loginSchema,
   createExpenseSchema,
   updateExpenseSchema,
+  createGroupSchema,
+  addGroupExpenseSchema,
 };
