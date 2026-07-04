@@ -451,9 +451,9 @@ expense-tracker-fullstack/
 | Day 2  | Express server, MySQL schema with 5 tables and composite indexes     | ✅ Done    |
 | Day 3  | JWT auth — register, login, protected routes, bcrypt, Joi validation | ✅ Done    |
 | Day 4  | Expense CRUD API — GET/POST/PUT/DELETE, ownership checks, CSV export | ✅ Done    |
-| Day 5  | Z-score anomaly detection algorithm                                  | 🔄 Next    |
-| Day 6  | Group expenses and settlements                                       | ⏳ Pending |
-| Day 7  | Analytics endpoints for charts                                       | ⏳ Pending |
+| Day 5  | Z-score anomaly detection algorithm                                  | ✅ Done    |
+| Day 6  | Group expenses and settlements                                       | ✅ Done    |
+| Day 7  | Analytics endpoints for charts                                       | ✅ Done    |
 | Week 2 | React frontend — auth pages, expense list, dashboard, charts         | ⏳ Pending |
 | Week 3 | Jest tests, Docker Compose, email alerts                             | ⏳ Pending |
 | Week 4 | Deploy, CI/CD pipeline, README polish                                | ⏳ Pending |
