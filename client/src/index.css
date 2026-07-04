@@ -1,0 +1,33 @@
+/* client/src/index.css */
+
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #ff6b4a;
+  --color-primary-dark: #e85a3a;
+  --color-secondary: #0d6e6e;
+  --color-accent: #ffb627;
+  --color-success: #22c55e;
+  --color-danger: #ef4444;
+  --color-bg: #fbfaf8;
+  --color-surface: #ffffff;
+  --color-border: #f0ede6;
+  --color-text: #1f2937;
+  --color-text-muted: #6b7280;
+
+  --font-heading: "Baloo 2", sans-serif;
+  --font-body: "Inter", sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+h1,
+h2,
+h3,
+.heading {
+  font-family: var(--font-heading);
+}
