@@ -1,25 +1,40 @@
-// client/src/pages/Dashboard.jsx
+// client/src/pages/Dashboard.jsx — confirm this is what you have
 
 import { useAuth } from "../context/AuthContext";
+import StatCard from "../components/StatCard";
 
 function Dashboard() {
   const { user, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+    <div className="min-h-screen bg-[#FBFAF8] p-8">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold text-gray-800">
+            Hi {user?.name?.split(" ")[0] || "there"} 👋
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Here's how this month is looking
+          </p>
+        </div>
         <button
           onClick={logout}
-          className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded text-sm"
+          className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-lg"
         >
-          Logout
+          Log out
         </button>
       </div>
-      <p className="mt-4 text-gray-400">Welcome, {user?.name}</p>
-      <p className="text-gray-500 text-sm mt-1">
-        Full dashboard built Day 11–12
-      </p>
+
+      <div className="grid grid-cols-3 gap-4">
+        <StatCard label="Spent this month" value={14350} prefix="₹" />
+        <StatCard
+          label="Budget left"
+          value={650}
+          prefix="₹"
+          valueColor="text-[#0D6E6E]"
+        />
+        <StatCard label="Transactions" value={18} />
+      </div>
     </div>
   );
 }
