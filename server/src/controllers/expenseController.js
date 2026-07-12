@@ -143,16 +143,20 @@ const editExpense = async (req, res, next) => {
       return next(new AppError("Expense not found", 404));
     }
 
-    // ADD THESE 4 LINES
-    console.log("expense.user_id        →", expense.user_id);
-    console.log("typeof expense.user_id →", typeof expense.user_id);
-    console.log("req.userId             →", req.userId);
-    console.log("typeof req.userId      →", typeof req.userId);
-
     if (expense.user_id !== req.userId) {
       return next(
         new AppError("You do not have permission to edit this expense", 403),
       );
+    }
+
+    // STEP 3: Validate the request body
+    const { error, value } = updateExpenseSchema.validate(req.body, {
+      abortEarly: false,
+    });
+
+    if (error) {
+      const messages = error.details.map((d) => d.message).join(", ");
+      return next(new AppError(messages, 400));
     }
 
     // STEP 4: Update
@@ -167,7 +171,6 @@ const editExpense = async (req, res, next) => {
     next(err);
   }
 };
-
 // ─── DELETE EXPENSE ───────────────────────────────────────
 // DELETE /api/expenses/:id
 
