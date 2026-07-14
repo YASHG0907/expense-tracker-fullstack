@@ -6,6 +6,8 @@ import { useAuth } from "../context/AuthContext";
 import StatCard from "../components/StatCard";
 import MonthlyTrendChart from "../components/MonthlyTrendChart";
 import CategoryPieChart from "../components/CategoryPieChart";
+import AnomalyBanner from "../components/AnomalyBanner";
+import BudgetProgressBar from "../components/BudgetProgressBar";
 import api from "../api/axios";
 
 function Dashboard() {
@@ -33,7 +35,6 @@ function Dashboard() {
     return <DashboardSkeleton />;
   }
 
-  // Fallback in case the API call failed entirely — avoids a blank crash
   if (!dashboardData) {
     return (
       <div className="min-h-screen bg-[#FBFAF8] flex items-center justify-center">
@@ -44,7 +45,8 @@ function Dashboard() {
     );
   }
 
-  const { currentMonth, monthlyTrend, categoryBreakdown } = dashboardData;
+  const { currentMonth, monthlyTrend, categoryBreakdown, anomalies } =
+    dashboardData;
 
   return (
     <div className="min-h-screen bg-[#FBFAF8] p-4 sm:p-8">
@@ -66,7 +68,10 @@ function Dashboard() {
         </button>
       </div>
 
-      {/* STAT CARDS — now driven by real data */}
+      {/* ANOMALY ALERTS — shown first, highest priority information */}
+      <AnomalyBanner anomalies={anomalies} />
+
+      {/* STAT CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <StatCard
           label="Spent this month"
@@ -108,6 +113,14 @@ function Dashboard() {
           <CategoryPieChart data={categoryBreakdown} />
         </div>
       </div>
+
+      {/* BUDGET PROGRESS */}
+      <BudgetProgressBar
+        percentUsed={currentMonth.percentUsed}
+        isOverBudget={currentMonth.isOverBudget}
+        budget={currentMonth.budget}
+        totalSpent={currentMonth.totalSpent}
+      />
     </div>
   );
 }
@@ -125,7 +138,7 @@ function DashboardSkeleton() {
           />
         ))}
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         {[1, 2].map((i) => (
           <div
             key={i}
@@ -133,6 +146,7 @@ function DashboardSkeleton() {
           />
         ))}
       </div>
+      <div className="bg-white border border-[#F0EDE6] rounded-2xl p-5 h-20 animate-pulse" />
     </div>
   );
 }

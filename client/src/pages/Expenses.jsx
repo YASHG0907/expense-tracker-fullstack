@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Download } from "lucide-react";
 import api from "../api/axios";
 import Modal from "../components/Modal";
 import ExpenseForm from "../components/ExpenseForm";
@@ -112,6 +112,39 @@ function Expenses() {
     }
   };
 
+  // Add this function inside the Expenses component
+
+  const handleExportCSV = async () => {
+    try {
+      const response = await api.get("/expenses/export", {
+        responseType: "blob", // tells axios to expect raw file data, not JSON
+      });
+
+      // Create a temporary downloadable URL from the response data
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      // Create an invisible link, click it programmatically, then remove it —
+      // this is the standard browser trick for triggering a file download
+      // from JavaScript rather than a plain <a href> link
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `expenses-${new Date().toISOString().split("T")[0]}.csv`,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      // Free up the memory used by the temporary URL
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Expenses exported");
+    } catch (err) {
+      toast.error("Could not export expenses");
+    }
+  };
+
   // ─── DELETE ─────────────────────────────────────────────
   const handleDelete = async () => {
     setDeleteLoading(true);
@@ -153,13 +186,22 @@ function Expenses() {
             {totalShown.toLocaleString("en-IN")} total
           </p>
         </div>
-        <button
-          onClick={openAddModal}
-          className="flex items-center justify-center gap-2 bg-[#FF6B4A] hover:bg-[#E85A3A] text-white font-medium px-5 py-2.5 rounded-xl transition-colors"
-        >
-          <Plus size={18} />
-          Add expense
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium px-4 py-2.5 rounded-xl transition-colors"
+          >
+            <Download size={18} />
+            Export
+          </button>
+          <button
+            onClick={openAddModal}
+            className="flex items-center justify-center gap-2 bg-[#FF6B4A] hover:bg-[#E85A3A] text-white font-medium px-5 py-2.5 rounded-xl transition-colors"
+          >
+            <Plus size={18} />
+            Add expense
+          </button>
+        </div>
       </div>
 
       {/* FILTERS */}
