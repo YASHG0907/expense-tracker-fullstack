@@ -174,7 +174,7 @@ function Expenses() {
   const totalShown = expenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
 
   return (
-    <div className="min-h-screen bg-[#FBFAF8] p-4 sm:p-8">
+    <div className="p-4 sm:p-8">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <div>

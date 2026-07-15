@@ -11,7 +11,7 @@ import BudgetProgressBar from "../components/BudgetProgressBar";
 import api from "../api/axios";
 
 function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -49,23 +49,15 @@ function Dashboard() {
     dashboardData;
 
   return (
-    <div className="min-h-screen bg-[#FBFAF8] p-4 sm:p-8">
+    <div className="p-4 sm:p-8">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="font-heading text-2xl font-semibold text-gray-800">
-            Hi {user?.name?.split(" ")[0] || "there"} 👋
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Here's how this month is looking
-          </p>
-        </div>
-        <button
-          onClick={logout}
-          className="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 px-4 py-2 rounded-lg bg-white"
-        >
-          Log out
-        </button>
+      <div className="mb-6">
+        <h1 className="font-heading text-2xl font-semibold text-gray-800">
+          Hi {user?.name?.split(" ")[0] || "there"} 👋
+        </h1>
+        <p className="text-sm text-gray-500 mt-1">
+          Here's how this month is looking
+        </p>
       </div>
 
       {/* ANOMALY ALERTS — shown first, highest priority information */}

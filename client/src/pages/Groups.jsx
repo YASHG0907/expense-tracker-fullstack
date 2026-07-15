@@ -106,7 +106,7 @@ function Groups() {
   // ─── LIST VIEW ──────────────────────────────────────────
   if (!selectedGroupId) {
     return (
-      <div className="min-h-screen bg-[#FBFAF8] p-4 sm:p-8">
+      <div className="p-4 sm:p-8">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="font-heading text-2xl font-semibold text-gray-800">
@@ -185,7 +185,7 @@ function Groups() {
   // ─── DETAIL VIEW ────────────────────────────────────────
   if (detailLoading || !groupDetail) {
     return (
-      <div className="min-h-screen bg-[#FBFAF8] p-4 sm:p-8">
+      <div className="p-4 sm:p-8">
         <div className="h-8 w-48 bg-gray-200 rounded-lg animate-pulse mb-6" />
         <div className="bg-white border border-[#F0EDE6] rounded-2xl p-5 h-64 animate-pulse" />
       </div>
@@ -193,7 +193,7 @@ function Groups() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FBFAF8] p-4 sm:p-8">
+    <div className="p-4 sm:p-8">
       <button
         onClick={goBackToList}
         className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 mb-4"
