@@ -381,35 +381,53 @@ INDEX idx_user_category (user_id, category)
 INDEX idx_amount (amount)
 ```
 
+**Why `(user_id, expense_date)` in that order, not `(expense_date, user_id)`:**
+MySQL uses composite indexes left-to-right — the leftmost column should be the one
+used in the most queries, ideally with an equality match (`user_id = ?`), while later
+columns handle range conditions (`expense_date BETWEEN ...`) or sorting. Since every
+query in this app always filters by a specific user first, `user_id` needed to be the
+leading column for the index to be usable across all of them.
+
 ### EXPLAIN Verification
+
+Tested against a synthetically generated dataset of 20,000 expense rows spread across
+24 months and 10 categories, to get a realistic before/after comparison (MySQL's optimizer
+behaves differently on tiny tables, so a meaningful test needs real volume).
 
 The query used for the main dashboard — fetching a user's expenses across a date range:
 
 ```sql
 EXPLAIN SELECT expense_date, SUM(amount) AS total, category
 FROM expenses
-WHERE user_id = 1
-AND expense_date BETWEEN '2025-01-01' AND '2025-03-31'
+WHERE user_id = ?
+AND expense_date BETWEEN DATE_SUB(CURDATE(), INTERVAL 6 MONTH) AND CURDATE()
 GROUP BY expense_date, category
 ORDER BY expense_date;
 ```
 
-**Result — index is being used:**
+**Before adding the composite index:**
 
 ![EXPLAIN before index](docs/explain-before-index.jpeg)
+
+| Column | Value   | Meaning                             |
+| ------ | ------- | ----------------------------------- |
+| type   | ALL     | Full table scan — every row is read |
+| key    | NULL    | No index used                       |
+| rows   | ~20,000 | Every row in the table is scanned   |
+
+**After adding `INDEX idx_user_date (user_id, expense_date)`:**
+
 ![EXPLAIN after index](docs/explain-after-index.jpeg)
 
-| Column | Value                 | Meaning                                        |
-| ------ | --------------------- | ---------------------------------------------- |
-| type   | range                 | Index range scan — NOT a full table scan       |
-| key    | idx_user_date         | Our composite index is being used ✓            |
-| rows   | ~20                   | Scans only matching rows, not the entire table |
-| Extra  | Using index condition | Query resolved entirely from index             |
+| Column | Value         | Meaning                                  |
+| ------ | ------------- | ---------------------------------------- |
+| type   | range         | Index range scan — not a full table scan |
+| key    | idx_user_date | Our composite index is being used ✓      |
+| rows   | ~11,000       | Only matching rows are scanned           |
 
-Without the index, `type` would be `ALL` and `rows` would equal the total table size.
-On a table with 1,920 rows, that means 1,920 rows scanned vs ~305 rows — a reduction of over 84%.
-
----
+**Result: a [50 %] reduction in rows scanned**, measured on a 20,000-row dataset —
+from a full table scan down to an index range scan touching only the rows relevant to
+the specific user and date range being queried.
 
 ## 🗄️ Database Schema
 
