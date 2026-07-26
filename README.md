@@ -3,7 +3,7 @@
 > A production-grade full-stack expense management system built with
 > Node.js, Express, MySQL, and React. Features JWT authentication,
 > real-time analytics dashboard, Z-score anomaly detection, and
-> multi-user group expense settlements.
+> multi-user group expense settlements — fully containerized with Docker Compose.
 
 ## 🔗 Live Demo
 
@@ -13,29 +13,31 @@
 
 ## 🛠️ Tech Stack
 
-| Layer         | Technology                        | Purpose                                           |
-| ------------- | --------------------------------- | ------------------------------------------------- |
-| Frontend      | React 18 (Vite) + Tailwind CSS v4 | UI and styling                                    |
-| Routing       | React Router v7                   | Client-side navigation, protected routes          |
-| HTTP Client   | Axios                             | API calls with auto-attached JWT via interceptors |
-| Charts        | Recharts                          | Bar and pie chart dashboards                      |
-| Notifications | React Hot Toast                   | Toast alerts                                      |
-| Icons         | Lucide React                      | UI iconography                                    |
-| Backend       | Node.js + Express.js              | REST API server                                   |
-| Database      | MySQL 8                           | Persistent data storage                           |
-| Auth          | JWT + bcrypt                      | Secure authentication                             |
-| Validation    | Joi                               | Request body validation                           |
-| Security      | express-rate-limit, CORS          | Rate limiting and cross-origin                    |
-| Logging       | Morgan                            | HTTP request logging                              |
-| Testing       | Jest + Supertest                  | Unit and integration tests                        |
-| DevOps        | Docker Compose                    | Containerized deployment                          |
-| Deployment    | Railway + Vercel                  | Free cloud hosting                                |
+| Layer         | Technology                          | Purpose                                           |
+| ------------- | ----------------------------------- | ------------------------------------------------- |
+| Frontend      | React 18 (Vite) + Tailwind CSS v4   | UI and styling                                    |
+| Routing       | React Router v7                     | Client-side navigation, protected routes          |
+| HTTP Client   | Axios                               | API calls with auto-attached JWT via interceptors |
+| Charts        | Recharts                            | Bar and pie chart dashboards                      |
+| Notifications | React Hot Toast                     | Toast alerts                                      |
+| Icons         | Lucide React                        | UI iconography                                    |
+| Backend       | Node.js + Express.js                | REST API server                                   |
+| Database      | MySQL 8                             | Persistent data storage                           |
+| Auth          | JWT + bcrypt                        | Secure authentication                             |
+| Validation    | Joi                                 | Request body validation                           |
+| Security      | express-rate-limit, CORS            | Rate limiting and cross-origin                    |
+| Logging       | Morgan                              | HTTP request logging                              |
+| Testing       | Jest + Supertest                    | Unit and integration tests                        |
+| DevOps        | Docker Compose (multi-stage builds) | Containerized deployment — one-command startup    |
+| Deployment    | Railway + Vercel                    | Free cloud hosting                                |
 
 ---
 
 ## ✅ Features
 
-### Built (Days 1–8)
+### Built (Days 1–19)
+
+**Backend & API**
 
 - [x] MySQL schema — 5 tables with foreign keys and composite indexes
 - [x] Express server with full middleware stack
@@ -44,7 +46,7 @@
 - [x] Joi request validation with descriptive error messages
 - [x] JWT middleware protecting all private routes
 - [x] Login rate limiting — 5 attempts per 15 minutes per IP
-- [x] Global error handler with correct HTTP status codes
+- [x] Global error handler with correct HTTP status codes, DB error mapping
 - [x] Expense CRUD — create, read, update, delete
 - [x] Ownership validation — users can only edit their own expenses
 - [x] Dynamic query filtering — by month, year, and category
@@ -55,25 +57,47 @@
 - [x] Z-score anomaly detection algorithm
 - [x] Multi-user shared expense groups with debt-simplification settlement
 - [x] Unified analytics dashboard endpoint
+
+**Frontend**
+
 - [x] React + Vite frontend scaffold with Tailwind CSS v4
 - [x] Client-side routing with protected route guards
 - [x] Global auth context with persistent login via localStorage
 - [x] Axios instance with automatic JWT attachment and 401 auto-logout
 - [x] Custom light, cross-generational design system with animated UI components
+- [x] Login and register forms wired to the backend
+- [x] Expense list with add/edit modal, delete confirmation, category/month filters
+- [x] Full analytics dashboard — real bar/pie charts, animated stat cards
+- [x] Anomaly alert banners surfacing the Z-score algorithm in the UI
+- [x] Animated budget progress bar with three-tier color states
+- [x] CSV export button (blob download with auth header)
+- [x] Groups UI — create/invite flow, shared expenses, settlement display
+- [x] Shared navigation bar with mobile hamburger menu
+- [x] Full mobile responsive pass across every page
+
+**Testing**
+
+- [x] Jest unit tests for anomaly detection algorithm (edge cases: zero variance, insufficient history)
+- [x] Jest unit tests for settlement/debt-simplification algorithm (invariant + minimality tests)
+- [x] Supertest integration tests for auth endpoints (register, login, /me)
+- [x] Supertest integration tests for expense CRUD, including ownership security checks
+
+**DevOps**
+
+- [x] Multi-stage Dockerfile for backend (Node/Express)
+- [x] Multi-stage Dockerfile for frontend (Vite build → nginx serve)
+- [x] nginx config handling React Router client-side routing on refresh
+- [x] Docker Compose orchestrating MySQL, API, and frontend with healthcheck-gated startup
+- [x] Auto-provisioned database schema on first container start
+- [x] Measured EXPLAIN before/after query optimization on a 20,000-row dataset
 
 ### Coming Next
 
-- [ ] Login and register forms wired to the backend (Day 9)
-- [ ] Expense list and add/edit modal UI (Day 10)
-- [ ] Full analytics dashboard with charts and anomaly alerts (Day 11–12)
-- [ ] CSV export button and budget progress bar UI (Day 12)
-- [ ] Group expenses UI with settlement display (Day 13)
-- [ ] Mobile responsive layout and loading states (Day 14)
-- [ ] Jest test suite — 85% coverage target (Week 3)
-- [ ] Docker Compose full containerization (Week 3)
-- [ ] Email alerts when monthly budget exceeded (Week 3)
+- [ ] Email alerts when monthly budget exceeded (Day 20–21)
+- [ ] Morgan request logging polish (Day 20–21)
 - [ ] GitHub Actions CI pipeline (Week 4)
 - [ ] Production deployment on Railway + Vercel (Week 4)
+- [ ] Final README polish and demo GIF (Week 4)
 
 ---
 
@@ -325,9 +349,7 @@ All analytics endpoints require `Authorization: Bearer <token>`
 ### Valid Expense Categories
 
 Food | Transport | Shopping | Health | Entertainment
-Housing | Utilities | Education | Travel | Other
-
----
+Housing | Utilities | Education | Travel | Other---
 
 ## 🎨 Frontend Architecture
 
@@ -346,21 +368,51 @@ client/src/
 │ └── axios.js # Axios instance — auto-attaches JWT, auto-logout on 401
 ├── components/
 │ ├── PrivateRoute.jsx # Route guard — redirects unauthenticated users to /login
-│ └── StatCard.jsx # Reusable animated stat card (3D tilt + count-up)
+│ ├── AppLayout.jsx # Wraps protected pages with the navbar
+│ ├── Navbar.jsx # Top navigation, mobile hamburger menu
+│ ├── StatCard.jsx # Reusable animated stat card (3D tilt + count-up)
+│ ├── Modal.jsx # Generic modal shell
+│ ├── ConfirmDialog.jsx # Delete confirmation dialog
+│ ├── ExpenseForm.jsx # Add/edit expense form
+│ ├── MonthlyTrendChart.jsx # Bar chart (Recharts)
+│ ├── CategoryPieChart.jsx # Donut chart (Recharts)
+│ ├── AnomalyBanner.jsx # Z-score alert banners
+│ ├── BudgetProgressBar.jsx # Animated budget usage bar
+│ ├── CreateGroupForm.jsx # Group creation with email-chip invites
+│ ├── GroupExpenseForm.jsx # Add shared group expense
+│ └── SettlementSummary.jsx # "Who owes whom" display
 ├── context/
 │ └── AuthContext.jsx # Global auth state, persisted via localStorage
 ├── pages/
-│ ├── Login.jsx # Day 9
-│ ├── Register.jsx # Day 9
-│ ├── Dashboard.jsx # Day 11–12
-│ ├── Expenses.jsx # Day 10
-│ └── Groups.jsx # Day 13
+│ ├── Login.jsx
+│ ├── Register.jsx
+│ ├── Dashboard.jsx # Real data — charts, anomalies, budget bar
+│ ├── Expenses.jsx # Full CRUD list + filters + CSV export
+│ └── Groups.jsx # List view + detail view + settlements
 ├── App.jsx # Router setup — public and protected routes
 └── index.css # Tailwind v4 theme tokens
 
 ### Auth Flow
 
 JWT and user object persist in `localStorage` on login. `AuthContext` restores session state on app load via a `useEffect` check, with a `loading` flag to prevent a login-page flash for already-authenticated users. `PrivateRoute` wraps any page requiring login and redirects to `/login` if `isAuthenticated` is false. Axios interceptors attach the JWT to every outgoing request automatically and force logout on any `401` response.
+
+---
+
+## 🧪 Testing
+
+### Unit Tests — Pure Algorithms
+
+`tests/anomalyDetector.test.js` and `tests/settlementCalculator.test.js` test the Z-score and debt-simplification algorithms in isolation — no database, no HTTP, pure functions. Coverage includes edge cases: zero-variance history (fixed rent), insufficient history (fewer than 2 months), empty inputs, and an invariant test confirming all settlement balances sum to zero.
+
+### Integration Tests — Real HTTP + Database
+
+`tests/auth.test.js` and `tests/expenses.test.js` use Supertest against the actual Express app, hitting real endpoints with a real MySQL connection. Test-created data is isolated with a `jesttest_` email prefix and cleaned up in an `afterAll()` hook, so test runs never pollute real data. Specifically verifies the ownership security boundary — a second user cannot view, update, or delete another user's expenses, confirmed with explicit 403 assertions.
+
+```bash
+cd server
+npm test              # run all tests
+npm run test:coverage # run with coverage report
+```
 
 ---
 
@@ -425,9 +477,50 @@ ORDER BY expense_date;
 | key    | idx_user_date | Our composite index is being used ✓      |
 | rows   | ~11,000       | Only matching rows are scanned           |
 
-**Result: a [50 %] reduction in rows scanned**, measured on a 20,000-row dataset —
+**Result: roughly a 50% reduction in rows scanned**, measured on a 20,000-row dataset —
 from a full table scan down to an index range scan touching only the rows relevant to
 the specific user and date range being queried.
+
+---
+
+## 🐳 Containerization (Docker Compose)
+
+The full stack — MySQL, Express API, and React frontend — runs with a single command, correctly networked and with the database schema auto-provisioned on first start.
+
+### Architecture
+
+services:
+db → MySQL 8, schema.sql auto-loaded on first init, healthcheck-gated
+server → Node/Express, multi-stage-free build, waits for db health before starting
+client → Vite build → nginx multi-stage image, serves static files
+
+- **Multi-stage builds** for the frontend: Stage 1 installs dependencies and runs `vite build`; Stage 2 starts from a fresh `nginx:alpine` image and copies over only the compiled `dist/` output — Node.js itself never ships in the final image.
+- **Service networking** — containers address each other by service name (`db`, not `localhost`) over Compose's internal DNS, rather than hardcoded IPs.
+- **Healthcheck-gated startup** — the `server` service uses `depends_on: condition: service_healthy` on `db`, so it doesn't attempt a connection until MySQL is actually accepting connections, not just until the container process has started.
+- **Build-time vs runtime env vars** — `VITE_API_URL` is passed as a Docker build `ARG` (not a runtime `environment:` entry), since Vite bakes environment variables into the static JS bundle during the build step, before the container ever runs.
+- **nginx routing fix** — a custom `nginx.conf` with `try_files $uri $uri/ /index.html;` ensures refreshing on a client-side route (e.g. `/dashboard`) doesn't 404.
+
+### Quick Start with Docker
+
+```bash
+git clone https://github.com/yourusername/expense-tracker-fullstack.git
+cd expense-tracker-fullstack
+
+cp .env.example .env
+# Edit .env — set a real DB_PASSWORD and JWT_SECRET
+
+docker-compose up --build
+```
+
+- Frontend: [http://localhost:3000](http://localhost:3000)
+- Backend health check: [http://localhost:5000/health](http://localhost:5000/health)
+
+```bash
+docker-compose down       # stop, keep database data
+docker-compose down -v    # stop and wipe database data (fresh schema re-init)
+```
+
+---
 
 ## 🗄️ Database Schema
 
@@ -475,29 +568,29 @@ group_expenses
 
 ### Z-Score Anomaly Detection
 
-For each spending category, calculates the mean and standard deviation of the last 3 months, then flags the current month if it's more than 2 standard deviations above that average — the statistical definition of an outlier. Categories with fewer than 2 months of history are skipped to avoid meaningless comparisons. A zero-variance fallback (`10% of mean`) prevents tiny fluctuations in fixed costs like rent from triggering false alarms.
+For each spending category, calculates the mean and standard deviation of the last 3 months, then flags the current month if it's more than 2 standard deviations above that average — the statistical definition of an outlier. Categories with fewer than 2 months of history are skipped to avoid meaningless comparisons. A zero-variance fallback (`10% of mean`) prevents tiny fluctuations in fixed costs like rent from triggering false alarms. Covered by unit tests for every edge case described above.
 
 ### Debt Simplification (Group Settlements)
 
-Calculates each group member's net balance (amount paid minus their equal share of the total), then greedily matches the largest creditor with the largest debtor, settling the smaller amount between them repeatedly until all balances reach zero. Guarantees at most `n - 1` transactions for `n` members — provably minimal, same category of algorithm used by Splitwise.
+Calculates each group member's net balance (amount paid minus their equal share of the total), then greedily matches the largest creditor with the largest debtor, settling the smaller amount between them repeatedly until all balances reach zero. Guarantees at most `n - 1` transactions for `n` members — provably minimal, same category of algorithm used by Splitwise. Verified with a unit test asserting all net balances sum to zero, in addition to specific known-scenario tests.
 
 ---
 
 ## 🔒 Security Implementation
 
-| Concern             | Implementation                                                                 |
-| ------------------- | ------------------------------------------------------------------------------ |
-| Password storage    | bcrypt hash, saltRounds: 10. Plain passwords never stored or logged            |
-| Token security      | JWT signed with secret from `.env`, expires in 7 days                          |
-| Brute force         | Login rate limited to 5 requests per 15 minutes per IP                         |
-| SQL injection       | Parameterized queries (`?` placeholders) throughout all models                 |
-| Input validation    | Joi schemas validate every request body before it touches the database         |
-| Ownership           | Every update/delete checks `expense.user_id === req.userId` before proceeding  |
-| Group authorization | Every group route checks membership before allowing access or mutation         |
-| User enumeration    | Login returns identical message for wrong email and wrong password             |
-| CORS                | Only the frontend origin is whitelisted                                        |
-| Secrets             | All credentials in `.env` — never committed to Git, on either client or server |
-| Session handling    | Axios auto-clears localStorage and redirects to login on any 401 response      |
+| Concern             | Implementation                                                                                                 |
+| ------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Password storage    | bcrypt hash, saltRounds: 10. Plain passwords never stored or logged                                            |
+| Token security      | JWT signed with secret from `.env`, expires in 7 days                                                          |
+| Brute force         | Login rate limited to 5 requests per 15 minutes per IP                                                         |
+| SQL injection       | Parameterized queries (`?` placeholders) throughout all models                                                 |
+| Input validation    | Joi schemas validate every request body before it touches the database                                         |
+| Ownership           | Every update/delete checks `expense.user_id === req.userId` before proceeding, verified with integration tests |
+| Group authorization | Every group route checks membership before allowing access or mutation                                         |
+| User enumeration    | Login returns identical message for wrong email and wrong password                                             |
+| CORS                | Only the frontend origin is whitelisted                                                                        |
+| Secrets             | All credentials in `.env` — never committed to Git, on client, server, or root                                 |
+| Session handling    | Axios auto-clears localStorage and redirects to login on any 401 response                                      |
 
 ---
 
@@ -508,25 +601,26 @@ Calculates each group member's net balance (amount paid minus their equal share 
 Node.js v20+
 MySQL 8
 Git
-Docker Desktop (optional — Week 3)
+Docker Desktop (for one-command setup — see Containerization section above)
 
-### Backend Setup
+### Option A — Docker (Recommended)
+
+See [Containerization](#-containerization-docker-compose) above — `docker-compose up --build` runs the entire stack.
+
+### Option B — Manual Setup
+
+**Backend**
 
 ```bash
-# 1. Clone the repository
 git clone https://github.com/yourusername/expense-tracker-fullstack.git
-cd expense-tracker-fullstack
-
-# 2. Install backend dependencies
-cd server
+cd expense-tracker-fullstack/server
 npm install
 
-# 3. Set up environment variables
 cp .env.example .env
 # Edit .env — fill in your MySQL password and a JWT secret
 ```
 
-Your `server/.env` should look like:
+`server/.env`:
 
 ```env
 PORT=5000
@@ -540,37 +634,25 @@ JWT_EXPIRES_IN=7d
 ```
 
 ```bash
-# 4. Create the database tables
-# Open MySQL Workbench, connect to localhost
-# Open and run: server/src/config/schema.sql
+# Open MySQL Workbench, connect to localhost, run: server/src/config/schema.sql
 
-# 5. Start the development server
 npm run dev
-
-# Server starts on http://localhost:5000
-# You should see:
 # ✅ MySQL connected successfully
 # 🚀 Server running on http://localhost:5000
 ```
 
-Verify it works: open [http://localhost:5000/health](http://localhost:5000/health)
+Verify: [http://localhost:5000/health](http://localhost:5000/health) → `{ "success": true, "message": "Server is running" }`
 
-```json
-{ "success": true, "message": "Server is running" }
-```
-
-### Frontend Setup
+**Frontend**
 
 ```bash
 cd client
 npm install
 
 cp .env.example .env
-# Default value points to the local backend — no changes needed
 # VITE_API_URL=http://localhost:5000/api
 
 npm run dev
-
 # Client starts on http://localhost:3000
 ```
 
@@ -581,60 +663,40 @@ npm run dev
 expense-tracker-fullstack/
 │
 ├── client/
+│ ├── Dockerfile # Multi-stage: vite build → nginx serve
+│ ├── nginx.conf # SPA routing fix (try_files fallback)
 │ ├── src/
-│ │ ├── api/
-│ │ │ └── axios.js # Axios instance with JWT interceptors
-│ │ ├── components/
-│ │ │ ├── PrivateRoute.jsx # Protected route guard
-│ │ │ └── StatCard.jsx # Animated stat card (tilt + count-up)
-│ │ ├── context/
-│ │ │ └── AuthContext.jsx # Global auth state
-│ │ ├── pages/
-│ │ │ ├── Login.jsx
-│ │ │ ├── Register.jsx
-│ │ │ ├── Dashboard.jsx
-│ │ │ ├── Expenses.jsx
-│ │ │ └── Groups.jsx
-│ │ ├── App.jsx # Router configuration
-│ │ └── index.css # Tailwind v4 theme tokens
+│ │ ├── api/axios.js
+│ │ ├── components/ # 13 reusable components — see Frontend Architecture
+│ │ ├── context/AuthContext.jsx
+│ │ ├── pages/ # Login, Register, Dashboard, Expenses, Groups
+│ │ ├── App.jsx
+│ │ └── index.css
 │ ├── .env.example
 │ └── package.json
 │
 ├── server/
+│ ├── Dockerfile
 │ ├── src/
 │ │ ├── config/
-│ │ │ ├── db.js # MySQL connection pool (mysql2/promise)
-│ │ │ └── schema.sql # Database schema — all 5 tables
-│ │ │
-│ │ ├── routes/
-│ │ │ ├── auth.js # POST /register, POST /login, GET /me
-│ │ │ ├── expenses.js # Full CRUD + summary + anomalies + export
-│ │ │ ├── groups.js # Group CRUD + settlement balances
-│ │ │ └── analytics.js # Unified dashboard + trends
-│ │ │
+│ │ │ ├── db.js
+│ │ │ └── schema.sql
+│ │ ├── routes/ # auth, expenses, groups, analytics
 │ │ ├── controllers/
-│ │ │ ├── authController.js
-│ │ │ ├── expenseController.js
-│ │ │ ├── groupController.js
-│ │ │ └── analyticsController.js
-│ │ │
 │ │ ├── models/
-│ │ │ ├── userModel.js
-│ │ │ ├── expenseModel.js
-│ │ │ └── groupModel.js
-│ │ │
-│ │ ├── middleware/
-│ │ │ └── authMiddleware.js # JWT verification → attaches req.userId
-│ │ │
+│ │ ├── middleware/authMiddleware.js
 │ │ ├── utils/
 │ │ │ ├── AppError.js
 │ │ │ ├── validators.js
-│ │ │ ├── anomalyDetector.js # Z-score statistical model
-│ │ │ └── settlementCalculator.js # Debt simplification algorithm
-│ │ │
-│ │ └── index.js # Express app — middleware + routes + server
-│ │
-│ ├── tests/ # Jest tests (Week 3)
+│ │ │ ├── anomalyDetector.js
+│ │ │ └── settlementCalculator.js
+│ │ └── index.js
+│ ├── tests/
+│ │ ├── testHelpers.js
+│ │ ├── anomalyDetector.test.js
+│ │ ├── settlementCalculator.test.js
+│ │ ├── auth.test.js
+│ │ └── expenses.test.js
 │ ├── .env.example
 │ └── package.json
 │
@@ -642,31 +704,38 @@ expense-tracker-fullstack/
 │ ├── explain-before-index.jpeg
 │ └── explain-after-index.jpeg
 │
-├── docker-compose.yml # Full stack container setup (Week 3)
+├── docker-compose.yml # Orchestrates db + server + client
+├── .env.example # Root-level, for docker-compose
 └── README.md
 
 ---
 
 ## 📊 Build Progress
 
-| Day       | What Was Built                                                         | Status     |
-| --------- | ---------------------------------------------------------------------- | ---------- |
-| Day 1     | Environment setup, Git, GitHub repo, folder structure                  | ✅ Done    |
-| Day 2     | Express server, MySQL schema with 5 tables and composite indexes       | ✅ Done    |
-| Day 3     | JWT auth — register, login, protected routes, bcrypt, Joi validation   | ✅ Done    |
-| Day 4     | Expense CRUD API — GET/POST/PUT/DELETE, ownership checks, CSV export   | ✅ Done    |
-| Day 5     | Z-score anomaly detection algorithm                                    | ✅ Done    |
-| Day 6     | Group expenses and debt-simplification settlements                     | ✅ Done    |
-| Day 7     | Unified analytics endpoints, upgraded global error handler             | ✅ Done    |
-| Day 8     | React + Vite frontend scaffold, routing, auth context, design system   | ✅ Done    |
-| Day 9     | Login and register forms wired to backend                              | 🔄 Next    |
-| Day 10    | Expense list and CRUD modal UI                                         | ⏳ Pending |
-| Day 11–12 | Dashboard with charts, anomaly alerts, CSV export, budget progress bar | ⏳ Pending |
-| Day 13    | Group expenses UI                                                      | ⏳ Pending |
-| Day 14    | Mobile responsive polish, loading states                               | ⏳ Pending |
-| Week 3    | Jest tests, Docker Compose, email alerts                               | ⏳ Pending |
-| Week 4    | Deploy, CI/CD pipeline, README polish                                  | ⏳ Pending |
+| Day       | What Was Built                                                          | Status     |
+| --------- | ----------------------------------------------------------------------- | ---------- |
+| Day 1     | Environment setup, Git, GitHub repo, folder structure                   | ✅ Done    |
+| Day 2     | Express server, MySQL schema with 5 tables and composite indexes        | ✅ Done    |
+| Day 3     | JWT auth — register, login, protected routes, bcrypt, Joi validation    | ✅ Done    |
+| Day 4     | Expense CRUD API — GET/POST/PUT/DELETE, ownership checks, CSV export    | ✅ Done    |
+| Day 5     | Z-score anomaly detection algorithm                                     | ✅ Done    |
+| Day 6     | Group expenses and debt-simplification settlements                      | ✅ Done    |
+| Day 7     | Unified analytics endpoints, upgraded global error handler              | ✅ Done    |
+| Day 8     | React + Vite frontend scaffold, routing, auth context, design system    | ✅ Done    |
+| Day 9     | Login and register forms wired to backend                               | ✅ Done    |
+| Day 10    | Expense list and CRUD modal UI                                          | ✅ Done    |
+| Day 11    | Dashboard wired to real data — bar and pie charts                       | ✅ Done    |
+| Day 12    | Anomaly alert banners, budget progress bar, CSV export                  | ✅ Done    |
+| Day 13    | Groups UI — create, invite, shared expenses, settlements                | ✅ Done    |
+| Day 14    | Navigation bar, mobile responsive polish across all pages               | ✅ Done    |
+| Day 15    | Jest unit tests — anomaly detection and settlement algorithms           | ✅ Done    |
+| Day 16    | Supertest integration tests — auth and expense APIs, ownership security | ✅ Done    |
+| Day 17    | Measured EXPLAIN before/after on a 20,000-row synthetic dataset         | ✅ Done    |
+| Day 18    | Dockerfiles for server and client, tested standalone                    | ✅ Done    |
+| Day 19    | Docker Compose — full stack orchestration, healthcheck-gated startup    | ✅ Done    |
+| Day 20–21 | Email budget alerts, request logging polish                             | 🔄 Next    |
+| Week 4    | GitHub Actions CI, deploy to Railway + Vercel, final README polish      | ⏳ Pending |
 
 ---
 
-_Portfolio project for engineering campus placements — demonstrating full-stack development with Node.js, Express, MySQL, React, and DevOps practices._
+_Portfolio project for engineering campus placements — demonstrating full-stack development with Node.js, Express, MySQL, React, Docker, and testing practices._
