@@ -1,31 +1,71 @@
-version: "3.8"
+# docker-compose.yml
 
 services:
+  # ─── DATABASE ────────────────────────────────────────────
   db:
     image: mysql:8
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
     ports:
       - "3306:3306"
     volumes:
+      # Named volume — MySQL's actual data files persist here,
+      # surviving container restarts and rebuilds
       - mysql_data:/var/lib/mysql
+      # Auto-runs this SQL file exactly once, the FIRST time this
+      # container starts with an empty data directory — this is
+      # how your schema gets created without any manual step
+      - ./server/src/config/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    healthcheck:
+      # Compose can't just assume MySQL is "ready" the instant the
+      # container starts — actual startup takes several seconds.
+      # This periodically checks if MySQL is actually accepting
+      # connections yet, which the backend service depends on below.
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
+  # ─── BACKEND API ─────────────────────────────────────────
   server:
-    build: ./server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: unless-stopped
     ports:
       - "5000:5000"
-    depends_on:
-      - db
     environment:
-      - DB_HOST=db
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - JWT_SECRET=${JWT_SECRET}
+      PORT: 5000
+      NODE_ENV: production
+      # Note: DB_HOST is "db" — the service name above, NOT localhost.
+      # Docker Compose's internal DNS resolves "db" to the database
+      # container's actual internal IP automatically.
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      CLIENT_URL: http://localhost:3000
+    depends_on:
+      db:
+        # Don't just start after "db" begins starting — wait until
+        # the healthcheck above actually confirms MySQL is ready
+        condition: service_healthy
 
+  # ─── FRONTEND ────────────────────────────────────────────
   client:
-    build: ./client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        # Vite bakes environment variables into the static build
+        # at BUILD time, not runtime — so this has to be passed
+        # as a build arg, not a regular environment: entry below
+        VITE_API_URL: http://localhost:5000/api
+    restart: unless-stopped
     ports:
       - "3000:80"
     depends_on:

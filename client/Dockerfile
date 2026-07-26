@@ -13,8 +13,12 @@ RUN npm install
 
 COPY . .
 
-# Runs "vite build" — produces a dist/ folder with plain
-# HTML, CSS, and JS files. No React, no Node needed to SERVE these.
+# Receive the build arg passed from docker-compose.yml
+ARG VITE_API_URL
+# Expose it as an environment variable DURING the build step,
+# so Vite can actually read it via import.meta.env.VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN npm run build
 
 # ─── STAGE 2: SERVE ─────────────────────────────────────
