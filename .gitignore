@@ -143,6 +143,10 @@ vite.config.ts.timestamp-*
 .env.local
 client/.env
 
+.env
+server/.env
+client/.env
+
 # Dependencies
 node_modules/
 

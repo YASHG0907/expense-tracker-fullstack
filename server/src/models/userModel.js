@@ -37,4 +37,13 @@ const createUser = async (name, email, hashedPassword, monthly_budget = 0) => {
   return result.insertId;
 };
 
-module.exports = { findByEmail, findById, createUser };
+// Records that we just sent this user a budget alert email,
+// so we don't send another one until next month
+const updateLastAlertSent = async (userId) => {
+  await pool.query(
+    "UPDATE users SET last_alert_sent = CURDATE() WHERE id = ?",
+    [userId],
+  );
+};
+
+module.exports = { findByEmail, findById, createUser, updateLastAlertSent };

@@ -17,7 +17,8 @@ const {
   buildCategoryMaps,
 } = require("../utils/anomalyDetector");
 
-const { findById } = require("../models/userModel");
+const { findById, updateLastAlertSent } = require("../models/userModel");
+const { sendBudgetAlertEmail } = require("../services/emailService");
 const {
   createExpenseSchema,
   updateExpenseSchema,
@@ -119,6 +120,47 @@ const addExpense = async (req, res, next) => {
         spent: monthlyTotal,
         overage: (monthlyTotal - user.monthly_budget).toFixed(2),
       };
+    }
+
+    // ADD THIS — right after the budgetWarning block above
+
+    if (budgetWarning) {
+      // Spam prevention: only send if we haven't already sent
+      // an alert for this exact month
+      const now = new Date();
+      const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      const lastAlertStr = user.last_alert_sent
+        ? `${new Date(user.last_alert_sent).getFullYear()}-${String(new Date(user.last_alert_sent).getMonth() + 1).padStart(2, "0")}`
+        : null;
+
+      const alreadyAlertedThisMonth = lastAlertStr === currentMonthStr;
+
+      if (!alreadyAlertedThisMonth) {
+        try {
+          const monthName = expenseDate.toLocaleString("default", {
+            month: "long",
+          });
+
+          await sendBudgetAlertEmail({
+            toEmail: user.email,
+            userName: user.name,
+            spent: monthlyTotal,
+            budget: parseFloat(user.monthly_budget),
+            overage: monthlyTotal - user.monthly_budget,
+            month: monthName,
+          });
+
+          await updateLastAlertSent(req.userId);
+        } catch (emailError) {
+          // IMPORTANT: never let a failed email crash the actual expense creation.
+          // The expense was already successfully saved — email is a bonus
+          // notification, not a critical path. Log it, don't throw it.
+          console.error(
+            "❌ Failed to send budget alert email:",
+            emailError.message,
+          );
+        }
+      }
     }
 
     res.status(201).json({
