@@ -18,13 +18,15 @@ const transporter = nodemailer.createTransport({
 // Fails fast and loud if credentials are wrong, instead of
 // silently failing the first time a real user triggers an email
 
-transporter.verify((error) => {
-  if (error) {
-    console.error("❌ Email service failed to connect:", error.message);
-  } else {
-    console.log("✅ Email service ready");
-  }
-});
+if (process.env.NODE_ENV !== "test") {
+  transporter.verify((error) => {
+    if (error) {
+      console.error("❌ Email service failed to connect:", error.message);
+    } else {
+      console.log("✅ Email service ready");
+    }
+  });
+}
 
 // ─── SEND BUDGET EXCEEDED ALERT ──────────────────────────
 
