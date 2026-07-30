@@ -1,7 +1,8 @@
 require("dotenv").config();
 const express = require("express");
-const cors = require("cors");
+const requestId = require("./middleware/requestId");
 const morgan = require("morgan");
+const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 
 // Import DB connection — runs the connection test on startup
@@ -12,6 +13,24 @@ const PORT = process.env.PORT || 5000;
 
 // ─── MIDDLEWARE ─────────────────────────────────────────
 // Middleware = code that runs on EVERY request, in order
+
+app.use(requestId);
+
+// Register a custom Morgan token that pulls req.requestId
+morgan.token("reqid", (req) => req.requestId);
+
+// 4. Morgan — logs every request to console
+if (process.env.NODE_ENV === "test") {
+  // no logging during tests
+} else if (process.env.NODE_ENV === "production") {
+  app.use(
+    morgan(
+      ":reqid :method :url :status :response-time ms - :res[content-length]",
+    ),
+  );
+} else {
+  app.use(morgan(":reqid :method :url :status :response-time ms"));
+}
 
 // 1. CORS — lets React (port 3000) talk to this API (port 5000)
 app.use(
@@ -28,9 +47,7 @@ app.use(express.json());
 // 3. URL-encoded body parser (for form submissions)
 app.use(express.urlencoded({ extended: true }));
 
-// 4. Morgan — logs every request to console
-// Shows: POST /api/auth/login 200 45ms
-app.use(morgan("dev"));
+// ─── REQUEST ID (must come before logging) ─────────────
 
 // 5. Global rate limiter — max 100 reqs per 15 mins per IP
 const globalLimiter = rateLimit({
@@ -70,7 +87,7 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   // Log the full error server-side for debugging —
   // this never gets sent to the client
-  console.error("❌ Error:", err.message);
+  console.error(`❌ Error [${req.requestId}]:`, err.message);
   if (process.env.NODE_ENV !== "production") {
     console.error(err.stack);
   }
