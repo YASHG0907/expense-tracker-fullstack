@@ -1,5 +1,7 @@
 # Expense Tracker — Full Stack
 
+[![Run Tests](https://github.com/YASHG0907/expense-tracker-fullstack/actions/workflows/tests.yml/badge.svg)](https://github.com/YASHG0907/expense-tracker-fullstack/actions/workflows/tests.yml)
+
 > A production-grade full-stack expense management system built with
 > Node.js, Express, MySQL, and React. Features JWT authentication,
 > real-time analytics dashboard, Z-score anomaly detection, and
@@ -7,7 +9,12 @@
 
 ## 🔗 Live Demo
 
-**Coming Week 4** — deploying on Railway (API) + Vercel (Frontend)
+**App:** https://expense-tracker-fullstack-xi.vercel.app
+**Backend API:** https://expense-tracker-api-5up6.onrender.com/health
+
+> Both run on free tiers with no ongoing cost. The backend (Render) sleeps
+> after 15 minutes of inactivity — the first request after idle time may
+> take 30-50 seconds to respond while it wakes up. Subsequent requests are fast.
 
 ---
 
@@ -29,7 +36,7 @@
 | Logging       | Morgan                              | HTTP request logging                              |
 | Testing       | Jest + Supertest                    | Unit and integration tests                        |
 | DevOps        | Docker Compose (multi-stage builds) | Containerized deployment — one-command startup    |
-| Deployment    | Railway + Vercel                    | Free cloud hosting                                |
+| Deployment    | Render + Aiven + Vercel             | Free cloud hosting                                |
 
 ---
 
