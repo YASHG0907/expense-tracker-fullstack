@@ -1,0 +1,76 @@
+# .github/workflows/tests.yml
+
+name: Run Tests
+
+# Trigger: run this workflow on every push to main,
+# and on every pull request targeting main —
+# so broken code gets flagged before it's even merged, not after
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    # Runs on a fresh Ubuntu virtual machine GitHub provides for free
+    runs-on: ubuntu-latest
+
+    # Spin up a real MySQL instance as a "service container" —
+    # available to the test job for the duration of this run only,
+    # exactly like your Day 16 integration tests need a real database
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: testpassword
+          MYSQL_DATABASE: expense_tracker
+        ports:
+          - 3306:3306
+        # Wait for MySQL to actually be ready before proceeding —
+        # same healthcheck principle as Day 19's docker-compose setup
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      # Step 1: pull your actual repo code onto this fresh machine
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: install Node.js on this machine
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: server/package-lock.json
+
+      # Step 3: install your backend's dependencies
+      - name: Install dependencies
+        working-directory: ./server
+        run: npm ci
+
+      # Step 4: load your schema into the fresh MySQL service container —
+      # this MySQL instance starts completely empty, so your tables
+      # need to be created here, same as any fresh database setup
+      - name: Load database schema
+        run: mysql -h 127.0.0.1 -P 3306 -u root -ptestpassword expense_tracker < server/src/config/schema.sql
+
+      # Step 5: run your actual test suite
+      - name: Run tests
+        working-directory: ./server
+        env:
+          NODE_ENV: test
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USER: root
+          DB_PASSWORD: testpassword
+          DB_NAME: expense_tracker
+          JWT_SECRET: ci_test_secret_not_used_in_production
+          JWT_EXPIRES_IN: 7d
+          EMAIL_USER: test@example.com
+          EMAIL_PASS: fake_password_for_ci
+        run: npm test
