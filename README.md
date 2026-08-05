@@ -3,6 +3,8 @@
 [![Run Tests](https://github.com/YASHG0907/expense-tracker-fullstack/actions/workflows/tests.yml/badge.svg)](https://github.com/YASHG0907/expense-tracker-fullstack/actions/workflows/tests.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+![Demo](docs/Demo.gif)
+
 > A production-grade full-stack expense management system built with
 > Node.js, Express, MySQL, and React. Features JWT authentication,
 > real-time analytics dashboard, Z-score anomaly detection, and
