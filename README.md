@@ -760,7 +760,7 @@ This project is licensed under the MIT License — see [LICENSE](LICENSE) for de
 
 ---
 
-_Portfolio project for engineering campus placements — demonstrating full-stack development with Node.js, Express, MySQL, React, Docker, testing, and CI/CD practices._
+_Project demonstrating full-stack development with Node.js, Express, MySQL, React, Docker, testing, and CI/CD practices._
 LICENSE file content (create LICENSE at repo root with this)
 MIT License
 
